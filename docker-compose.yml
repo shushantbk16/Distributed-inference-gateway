@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # The Main Application
+  gateway:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - ENABLE_METRICS=true
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    volumes:
+      - ./src:/app/src  # Hot reload for development
+
+  # Semantic Cache
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  # Metrics Collector
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Metrics Visualization
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus

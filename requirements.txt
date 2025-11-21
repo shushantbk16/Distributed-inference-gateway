@@ -1,0 +1,40 @@
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# HTTP Client
+httpx==0.26.0
+
+# LLM Providers
+groq==0.4.2
+google-generativeai==0.3.2
+
+# Docker SDK
+docker==7.0.0
+
+# Environment & Configuration
+python-dotenv==1.0.0
+
+# Logging & Monitoring
+structlog==24.1.0
+
+# Utilities
+tenacity==8.2.3  # Retry logic
+asyncio-throttle==1.0.2  # Rate limiting
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+pytest-httpx==0.28.0
+
+# Development
+black==24.1.1
+flake8==7.0.0
+mypy==1.8.0
+redis
+sentence-transformers
+prometheus-fastapi-instrumentator
+locust

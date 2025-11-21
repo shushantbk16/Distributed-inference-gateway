@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: inference-gateway
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: gateway-cache
+          property: connectionString
+
+  - type: redis
+    name: gateway-cache
+    ipAllowList: [] # Only allow internal connections
+    plan: free # Use free tier if available, otherwise starter

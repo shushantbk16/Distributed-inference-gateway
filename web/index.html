@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Model Inference Gateway</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="url(#gradient)"/>
+                    <path d="M16 8L22 12V20L16 24L10 20V12L16 8Z" fill="white" opacity="0.9"/>
+                    <defs>
+                        <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32">
+                            <stop offset="0%" stop-color="#667eea"/>
+                            <stop offset="100%" stop-color="#764ba2"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <h1>Inference Gateway</h1>
+            </div>
+            <div class="status" id="status">
+                <span class="status-dot"></span>
+                <span class="status-text">Checking...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Input Section -->
+            <section class="input-section">
+                <h2>Test Multi-Model Inference</h2>
+                <p class="subtitle">Compare responses from Llama 3.3 and Gemini 1.5 Pro</p>
+                
+                <div class="input-group">
+                    <label for="prompt">Prompt</label>
+                    <textarea 
+                        id="prompt" 
+                        placeholder="e.g., Write a Python function to calculate fibonacci numbers"
+                        rows="4"
+                    ></textarea>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="setting">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="execute-code">
+                            <span class="checkbox-custom"></span>
+                            <span>Execute Code</span>
+                        </label>
+                        <p class="setting-description">Run generated code in sandbox</p>
+                    </div>
+                    
+                    <div class="setting">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="verify" checked>
+                            <span class="checkbox-custom"></span>
+                            <span>Verify Results</span>
+                        </label>
+                        <p class="setting-description">Use judge logic for synthesis</p>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="temperature">Temperature: <span id="temp-value">0.7</span></label>
+                    <input 
+                        type="range" 
+                        id="temperature" 
+                        min="0" 
+                        max="2" 
+                        step="0.1" 
+                        value="0.7"
+                        class="slider"
+                    >
+                </div>
+
+                <button id="submit-btn" class="submit-btn">
+                    <span class="btn-text">Generate Responses</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="results-section" style="display: none;">
+                <div class="results-header">
+                    <h2>Results</h2>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span class="metric-label">Total Latency</span>
+                            <span class="metric-value" id="total-latency">-</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Strategy</span>
+                            <span class="metric-value" id="strategy">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verification Report -->
+                <div id="verification-report" class="verification-report" style="display: none;"></div>
+
+                <!-- Model Responses -->
+                <div class="model-responses" id="model-responses"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
