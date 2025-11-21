@@ -39,6 +39,10 @@ jobs:
         pytest tests/test_judge.py tests/test_code_extractor.py -v
       env:
         ENVIRONMENT: "test"
+        PYTHONPATH: "."
+        GROQ_API_KEY: "dummy_groq_key"
+        GOOGLE_API_KEY: "dummy_google_key"
+        GATEWAY_API_KEY: "dummy_gateway_key"
         
     - name: Lint with flake8
       run: |
