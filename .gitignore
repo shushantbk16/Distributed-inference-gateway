@@ -1,0 +1,18 @@
+# .gitignore
+# Local environment files
+.env
+
+# Python cache / build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+build/
+dist/
+*.egg
+
+# IDE / editor files
+.vscode/
+.idea/
+*.swp
