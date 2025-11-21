@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '';
 const API_KEY = 'test_gateway_key_12345';
 
 // Elements
