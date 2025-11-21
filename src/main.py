@@ -247,6 +247,57 @@ async def run_inference(
                         )
                     except Exception as e:
                         logger.error(f"[{request_id}] Execution failed: {e}")
+
+            # Step 3.5: Self-Healing (Reflexion)
+            # If code failed, ask the LLM to fix it and re-run
+            from src.orchestrator.healer import Healer
+            
+            for response in model_responses:
+                # Check for failed executions with error output
+                for i, result in enumerate(response.execution_results):
+                    if not result.success and result.stderr:
+                        logger.info(f"[{request_id}] Detected execution failure for {response.provider}. Attempting to heal...")
+                        
+                        # Find the provider instance
+                        provider_instance = next(
+                            (p for p in inference_manager.providers if p.get_provider_name() == response.provider),
+                            None
+                        )
+                        
+                        if provider_instance and i < len(response.code_blocks):
+                            broken_code = response.code_blocks[i].code
+                            
+                            # Attempt to heal
+                            fixed_code = await Healer.heal_code(
+                                code=broken_code,
+                                error=result.stderr,
+                                provider=provider_instance
+                            )
+                            
+                            if fixed_code:
+                                logger.info(f"[{request_id}] Healer generated fix. Re-executing...")
+                                
+                                try:
+                                    # Create new code block
+                                    from src.models.response import CodeBlock
+                                    new_block = CodeBlock(language="python", code=fixed_code)
+                                    
+                                    # Re-execute
+                                    new_result = await sandbox_executor.execute_code(
+                                        new_block,
+                                        timeout=request.execution_config.timeout,
+                                        memory_limit=request.execution_config.memory_limit,
+                                        cpu_limit=request.execution_config.cpu_limit
+                                    )
+                                    
+                                    # Update response with fixed code and new result
+                                    response.code_blocks[i] = new_block
+                                    response.execution_results[i] = new_result
+                                    
+                                    logger.info(f"[{request_id}] Healing result: success={new_result.success}")
+                                    
+                                except Exception as e:
+                                    logger.error(f"[{request_id}] Re-execution of healed code failed: {e}")
         
         # Step 4: Verify and synthesize results
         verification = None
