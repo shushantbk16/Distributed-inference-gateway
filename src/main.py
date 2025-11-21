@@ -132,6 +132,22 @@ async def health_check():
         raise HTTPException(status_code=503, detail=f"Service unhealthy: {e}")
 
 
+@app.get("/api/v1/debug/config")
+async def debug_config(api_key: str = Depends(verify_api_key)):
+    """Debug endpoint to check loaded configuration (Masked)."""
+    def mask(s: str) -> str:
+        return f"{s[:4]}...{s[-4:]}" if s and len(s) > 8 else "Not Set"
+
+    return {
+        "groq_key": mask(settings.groq_api_key),
+        "google_key": mask(settings.google_api_key),
+        "gateway_key": mask(settings.gateway_api_key),
+        "groq_model": settings.groq_model,
+        "gemini_model": settings.gemini_model,
+        "environment": settings.environment
+    }
+
+
 @app.get("/api/v1/models")
 async def list_models():
     """List available models."""
