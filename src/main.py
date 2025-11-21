@@ -107,12 +107,9 @@ async def verify_api_key(x_api_key: str = Header(..., alias="X-API-Key")):
 
 @app.get("/")
 async def root():
-    """Root endpoint."""
-    return {
-        "message": "Distributed Multi-Model Inference Verification Gateway",
-        "version": "1.0.0",
-        "status": "operational"
-    }
+    """Root endpoint serving the Web UI."""
+    from fastapi.responses import FileResponse
+    return FileResponse("web/index.html")
 
 
 @app.get("/api/v1/health")
