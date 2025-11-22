@@ -7,7 +7,9 @@ from src.providers import GroqProvider, GeminiProvider, BaseLLMProvider
 from src.models.response import ModelResponse
 from src.config import settings
 from src.utils.logger import setup_logger
+from src.utils.logger import setup_logger
 from src.utils.errors import ProviderError
+from src.utils.rate_limiter import AsyncRateLimiter
 
 logger = setup_logger(__name__)
 
@@ -19,31 +21,41 @@ class InferenceManager:
         """Initialize the inference manager with all providers."""
         self.providers: List[BaseLLMProvider] = []
         
-        # Initialize Groq provider
-        try:
-            groq = GroqProvider(
-                api_key=settings.groq_api_key,
-                model_name=settings.groq_model
-            )
-            self.providers.append(groq)
-            logger.info(f"Initialized Groq provider with model {settings.groq_model}")
-        except Exception as e:
-            logger.error(f"Failed to initialize Groq provider: {e}")
+        # Initialize per-provider rate limiters
+        self.rate_limiters: Dict[str, AsyncRateLimiter] = {
+            "groq": AsyncRateLimiter(settings.groq_rpm),
+            "gemini": AsyncRateLimiter(settings.gemini_rpm),
+            "openai": AsyncRateLimiter(settings.openai_rpm),
+            "huggingface": AsyncRateLimiter(settings.huggingface_rpm),
+            "ollama": AsyncRateLimiter(settings.ollama_rpm),
+        }
+        self.default_limiter = AsyncRateLimiter(settings.max_requests_per_minute)
         
-        # Initialize Gemini provider
+        logger.info(f"Initialized rate limiters: Groq={settings.groq_rpm}, Gemini={settings.gemini_rpm}, "
+                    f"OpenAI={settings.openai_rpm}, HF={settings.huggingface_rpm}, Ollama={settings.ollama_rpm}")
+
+        # Initialize providers
         try:
-            gemini = GeminiProvider(
-                api_key=settings.google_api_key,
-                model_name=settings.gemini_model
-            )
-            self.providers.append(gemini)
-            logger.info(f"Initialized Gemini provider with model {settings.gemini_model}")
-        except Exception as e:
-            logger.error(f"Failed to initialize Gemini provider: {e}")
-        
-        # Initialize OpenAI provider (if API key is provided)
-        if settings.openai_api_key:
-            try:
+            # Groq
+            if settings.groq_api_key:
+                groq = GroqProvider(
+                    api_key=settings.groq_api_key,
+                    model_name=settings.groq_model
+                )
+                self.providers.append(groq)
+                logger.info(f"Initialized Groq provider with model {settings.groq_model}")
+            
+            # Gemini
+            if settings.google_api_key:
+                gemini = GeminiProvider(
+                    api_key=settings.google_api_key,
+                    model_name=settings.gemini_model
+                )
+                self.providers.append(gemini)
+                logger.info(f"Initialized Gemini provider with model {settings.gemini_model}")
+                
+            # OpenAI provider (if API key is provided)
+            if settings.openai_api_key:
                 from src.providers.openai_provider import OpenAIProvider
                 openai = OpenAIProvider(
                     api_key=settings.openai_api_key,
@@ -51,21 +63,21 @@ class InferenceManager:
                 )
                 self.providers.append(openai)
                 logger.info(f"Initialized OpenAI provider with model {settings.openai_model}")
-            except Exception as e:
-                logger.error(f"Failed to initialize OpenAI provider: {e}")
-        
-        # Initialize HuggingFace provider (FREE tier - if API key provided)
-        if settings.huggingface_api_key:
-            try:
-                from src.providers.huggingface_provider import HuggingFaceProvider
-                huggingface = HuggingFaceProvider(
-                    api_key=settings.huggingface_api_key,
-                    model_name=settings.huggingface_model
-                )
-                self.providers.append(huggingface)
-                logger.info(f"Initialized HuggingFace provider with model {settings.huggingface_model}")
-            except Exception as e:
-                logger.error(f"Failed to initialize HuggingFace provider: {e}")
+                
+            # HuggingFace (FREE tier - if API key provided)
+            if settings.huggingface_api_key:
+                try:
+                    from src.providers.huggingface_provider import HuggingFaceProvider
+                    huggingface = HuggingFaceProvider(
+                        api_key=settings.huggingface_api_key,
+                        model_name=settings.huggingface_model
+                    )
+                    self.providers.append(huggingface)
+                    logger.info(f"Initialized HuggingFace provider with model {settings.huggingface_model}")
+                except Exception as e:
+                    logger.error(f"Failed to initialize HuggingFace provider: {e}")
+        except Exception as e:
+            logger.error(f"Error initializing main providers: {e}")
         
         # Initialize Ollama provider (local, always try - it's FREE!)
         try:
@@ -161,6 +173,10 @@ class InferenceManager:
         start_time = time.time()
         
         try:
+            # Acquire rate limit token for specific provider
+            limiter = self.rate_limiters.get(provider_name, self.default_limiter)
+            await limiter.acquire()
+            
             logger.info(f"Starting inference for provider: {provider_name}")
             
             # Run with timeout

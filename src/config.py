@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     
     # LLM Provider Settings
     groq_model: str = "llama-3.3-70b-versatile"
-    gemini_model: str = "gemini-3-pro-preview"
+    gemini_model: str = "gemini-1.5-flash"
     openai_model: str = "gpt-3.5-turbo"
     huggingface_model: str = "google/flan-t5-large"
     ollama_model: str = "llama3.2"  # Local, FREE, unlimited!
@@ -36,7 +36,12 @@ class Settings(BaseSettings):
     sandbox_network_disabled: bool = True
     
     # Rate Limiting
-    max_requests_per_minute: int = 60
+    max_requests_per_minute: int = 10  # Global fallback
+    groq_rpm: int = 30
+    gemini_rpm: int = 6  # Strict free tier limit
+    openai_rpm: int = 60
+    huggingface_rpm: int = 30
+    ollama_rpm: int = 60
     request_timeout: int = 120  # seconds
     
     # Docker Settings

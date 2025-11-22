@@ -12,7 +12,7 @@ logger = setup_logger(__name__)
 class HuggingFaceProvider(BaseLLMProvider):
     """Hugging Face Inference API provider - FREE tier available!"""
     
-    BASE_URL = "https://api-inference.huggingface.co/models"
+    BASE_URL = "https://router.huggingface.co/models"
     
     def __init__(self, api_key: str, model_name: str = "google/flan-t5-large"):
         """Initialize HuggingFace provider with a reliable free model."""
