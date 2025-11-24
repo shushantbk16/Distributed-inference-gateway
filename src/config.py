@@ -9,8 +9,6 @@ class Settings(BaseSettings):
     # LLM Provider API Keys
     groq_api_key: str
     google_api_key: str
-    openai_api_key: str = ""  # Optional
-    huggingface_api_key: str = ""  # Optional - FREE tier available!
     
     # Gateway Configuration
     gateway_api_key: str
@@ -20,9 +18,6 @@ class Settings(BaseSettings):
     # LLM Provider Settings
     groq_model: str = "llama-3.3-70b-versatile"
     gemini_model: str = "gemini-3-pro-preview"
-    openai_model: str = "gpt-3.5-turbo"
-    huggingface_model: str = "google/flan-t5-large"
-    ollama_model: str = "llama3.2"  # Local, FREE, unlimited!
     
     # Cache Configuration
     redis_url: str = "redis://localhost:6379"
@@ -39,9 +34,6 @@ class Settings(BaseSettings):
     max_requests_per_minute: int = 10  # Global fallback
     groq_rpm: int = 30
     gemini_rpm: int = 6  # Strict free tier limit
-    openai_rpm: int = 60
-    huggingface_rpm: int = 30
-    ollama_rpm: int = 60
     request_timeout: int = 120  # seconds
     
     # Docker Settings
@@ -52,6 +44,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
+        extra = "ignore"
 
 
 # Global settings instance

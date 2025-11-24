@@ -1,0 +1,20 @@
+🚀 Verifying Backend Features...
+
+1️⃣  Testing Normal Response & Caching...
+   Request 1 (Uncached): 0.07s - Status: 200
+   Request 2 (Cached):   0.03s - Status: 200
+   ✅ Caching is WORKING (Response time significantly reduced)
+
+2️⃣  Testing Self-Healing...
+   Status: 200
+   ℹ️ Single execution result for groq: Success=True
+      Code: def calculate_division():
+    """
+    Calculates 1...
+      Stdout: Error: Division by zero is not allowed.
+      Stderr: 
+   ℹ️ Single execution result for gemini: Success=True
+      Code: # This script is designed to cause a ZeroDivisionE...
+      Stdout: 10.0
+      Stderr: 
+   ⚠️ No healing detected (LLM might have refused to write broken code or execution didn't fail in a way that triggered healing)

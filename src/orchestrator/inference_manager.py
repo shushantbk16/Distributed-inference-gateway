@@ -10,6 +10,7 @@ from src.utils.logger import setup_logger
 from src.utils.logger import setup_logger
 from src.utils.errors import ProviderError
 from src.utils.rate_limiter import AsyncRateLimiter
+from src.cache import get_cache
 
 logger = setup_logger(__name__)
 
@@ -25,14 +26,10 @@ class InferenceManager:
         self.rate_limiters: Dict[str, AsyncRateLimiter] = {
             "groq": AsyncRateLimiter(settings.groq_rpm),
             "gemini": AsyncRateLimiter(settings.gemini_rpm),
-            "openai": AsyncRateLimiter(settings.openai_rpm),
-            "huggingface": AsyncRateLimiter(settings.huggingface_rpm),
-            "ollama": AsyncRateLimiter(settings.ollama_rpm),
         }
         self.default_limiter = AsyncRateLimiter(settings.max_requests_per_minute)
         
-        logger.info(f"Initialized rate limiters: Groq={settings.groq_rpm}, Gemini={settings.gemini_rpm}, "
-                    f"OpenAI={settings.openai_rpm}, HF={settings.huggingface_rpm}, Ollama={settings.ollama_rpm}")
+        logger.info(f"Initialized rate limiters: Groq={settings.groq_rpm}, Gemini={settings.gemini_rpm}")
 
         # Initialize providers
         try:
@@ -54,41 +51,8 @@ class InferenceManager:
                 self.providers.append(gemini)
                 logger.info(f"Initialized Gemini provider with model {settings.gemini_model}")
                 
-            # OpenAI provider (if API key is provided)
-            if settings.openai_api_key:
-                from src.providers.openai_provider import OpenAIProvider
-                openai = OpenAIProvider(
-                    api_key=settings.openai_api_key,
-                    model_name=settings.openai_model
-                )
-                self.providers.append(openai)
-                logger.info(f"Initialized OpenAI provider with model {settings.openai_model}")
-                
-            # HuggingFace (FREE tier - if API key provided)
-            if settings.huggingface_api_key:
-                try:
-                    from src.providers.huggingface_provider import HuggingFaceProvider
-                    huggingface = HuggingFaceProvider(
-                        api_key=settings.huggingface_api_key,
-                        model_name=settings.huggingface_model
-                    )
-                    self.providers.append(huggingface)
-                    logger.info(f"Initialized HuggingFace provider with model {settings.huggingface_model}")
-                except Exception as e:
-                    logger.error(f"Failed to initialize HuggingFace provider: {e}")
         except Exception as e:
             logger.error(f"Error initializing main providers: {e}")
-        
-        # Initialize Ollama provider (local, always try - it's FREE!)
-        try:
-            from src.providers.ollama_provider import OllamaProvider
-            ollama = OllamaProvider(
-                model_name=settings.ollama_model
-            )
-            self.providers.append(ollama)
-            logger.info(f"Initialized Ollama provider with model {settings.ollama_model}")
-        except Exception as e:
-            logger.warning(f"Ollama not available (install with: brew install ollama): {e}")
         
         if not self.providers:
             raise RuntimeError("No LLM providers could be initialized")
@@ -173,9 +137,17 @@ class InferenceManager:
         start_time = time.time()
         
         try:
-            # Acquire rate limit token for specific provider
             limiter = self.rate_limiters.get(provider_name, self.default_limiter)
             await limiter.acquire()
+            
+            # Check cache first
+            cache = get_cache()
+            cached_data = cache.get(prompt, provider_name)
+            if cached_data:
+                # Reconstruct response from cache
+                cached_data["latency"] = 0.0  # Cache hit implies near-zero latency
+                cached_data["timestamp"] = datetime.utcnow()
+                return ModelResponse(**cached_data)
             
             logger.info(f"Starting inference for provider: {provider_name}")
             
@@ -203,6 +175,15 @@ class InferenceManager:
             )
             
             logger.info(f"Provider {provider_name} completed in {latency:.2f}s")
+            
+            # Cache the successful response
+            if cache:
+                try:
+                    # Use mode='json' to handle datetime serialization
+                    cache.set(prompt, provider_name, response.model_dump(mode='json'))
+                except Exception as e:
+                    logger.warning(f"Failed to cache response: {e}")
+            
             return response
             
         except asyncio.TimeoutError:

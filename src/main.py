@@ -154,8 +154,7 @@ async def list_models():
     return {
         "models": [
             {"provider": "groq", "model": settings.groq_model, "name": "Llama 3.3 70B"},
-            {"provider": "gemini", "model": settings.gemini_model, "name": "Gemini 1.5 Pro"},
-            {"provider": "ollama", "model": settings.ollama_model, "name": "Llama 3.2 Local"}
+            {"provider": "gemini", "model": settings.gemini_model, "name": "Gemini 1.5 Pro"}
         ]
     }
 

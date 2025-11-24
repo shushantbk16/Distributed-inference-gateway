@@ -1,0 +1,9 @@
+🚀 Verifying Groq and Gemini Providers...
+
+Received 2 responses:
+  - Provider: groq       | Model: llama-3.3-70b-versatile   | ✅ Success
+  - Provider: gemini     | Model: gemini-flash-latest       | ✅ Success
+
+Summary:
+  ✅ Groq is working
+  ✅ Gemini is working
