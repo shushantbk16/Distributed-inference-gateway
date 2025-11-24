@@ -19,22 +19,10 @@ python-dotenv==1.0.0
 
 # Logging & Monitoring
 structlog==24.1.0
+prometheus-fastapi-instrumentator
 
 # Utilities
 tenacity==8.2.3  # Retry logic
 asyncio-throttle==1.0.2  # Rate limiting
-
-# Testing
-pytest==7.4.3
-pytest-asyncio==0.23.3
-pytest-cov==4.1.0
-pytest-httpx==0.28.0
-
-# Development
-black==24.1.1
-flake8==7.0.0
-mypy==1.8.0
 redis
-
-prometheus-fastapi-instrumentator
-locust
+numpy
