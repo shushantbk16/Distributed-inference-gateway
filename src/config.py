@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     
     # LLM Provider Settings
     groq_model: str = "llama-3.3-70b-versatile"
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-3-pro-preview"
     openai_model: str = "gpt-3.5-turbo"
     huggingface_model: str = "google/flan-t5-large"
     ollama_model: str = "llama3.2"  # Local, FREE, unlimited!
