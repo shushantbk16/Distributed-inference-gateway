@@ -25,6 +25,18 @@ temperatureEl.addEventListener('input', (e) => {
 
 submitBtn.addEventListener('click', runInference);
 
+// UX: Verify requires Execute Code
+verifyEl.addEventListener('change', () => {
+    if (verifyEl.checked) {
+        executeCodeEl.checked = true;
+        executeCodeEl.disabled = true;
+        executeCodeEl.parentElement.title = "Execution is required for verification";
+    } else {
+        executeCodeEl.disabled = false;
+        executeCodeEl.parentElement.title = "";
+    }
+});
+
 // Check API health
 async function checkHealth() {
     try {
