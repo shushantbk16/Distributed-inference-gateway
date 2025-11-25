@@ -200,6 +200,11 @@ async def run_inference(
     logger.info(f"[{request_id}] Prompt: {request.prompt[:100]}...")
     
     try:
+        # Force code execution if verification is requested
+        if request.verify and not request.execute_code:
+            logger.info(f"[{request_id}] Verification requested, forcing execute_code=True")
+            request.execute_code = True
+
         # Step 1: Run inference on all providers in parallel
         logger.info(f"[{request_id}] Running parallel inference")
         model_responses = await inference_manager.run_inference(
