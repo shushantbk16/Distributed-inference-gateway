@@ -146,7 +146,8 @@ async def debug_config(api_key: str = Depends(verify_api_key)):
         "groq_model": settings.groq_model,
         "gemini_model": settings.gemini_model,
         "environment": settings.environment,
-        "genai_version": getattr(genai, "__version__", "unknown")
+        "genai_version": getattr(genai, "__version__", "unknown"),
+        "redis_url": mask(settings.redis_url)
     }
 
 
