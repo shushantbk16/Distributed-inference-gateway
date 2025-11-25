@@ -34,6 +34,7 @@ class SemanticCache:
         similarity_threshold: float = 0.95,
         ttl: int = 3600
     ):
+        self.init_error = None
         """
         Initialize semantic cache.
         
@@ -52,6 +53,7 @@ class SemanticCache:
         except Exception as e:
             logger.warning(f"Redis not available, caching disabled: {e}")
             self.redis_client = None
+            self.init_error = str(e)
         
         self.similarity_threshold = similarity_threshold
         self.ttl = ttl
@@ -219,7 +221,7 @@ class SemanticCache:
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics."""
         if not self.redis_client:
-            return {"enabled": False}
+            return {"enabled": False, "error": self.init_error}
         
         try:
             info = self.redis_client.info("stats")
