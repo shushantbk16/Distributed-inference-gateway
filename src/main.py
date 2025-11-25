@@ -138,13 +138,15 @@ async def debug_config(api_key: str = Depends(verify_api_key)):
     def mask(s: str) -> str:
         return f"{s[:4]}...{s[-4:]}" if s and len(s) > 8 else "Not Set"
 
+    import google.generativeai as genai
     return {
         "groq_key": mask(settings.groq_api_key),
         "google_key": mask(settings.google_api_key),
         "gateway_key": mask(settings.gateway_api_key),
         "groq_model": settings.groq_model,
         "gemini_model": settings.gemini_model,
-        "environment": settings.environment
+        "environment": settings.environment,
+        "genai_version": getattr(genai, "__version__", "unknown")
     }
 
 
