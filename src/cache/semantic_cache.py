@@ -44,10 +44,11 @@ class SemanticCache:
             ttl: Time to live in seconds (default 1 hour)
         """
         try:
-            self.redis_client = redis.from_url(
-                redis_url,
-                decode_responses=False  # Keep bytes for embeddings
-            )
+            kwargs = {"decode_responses": False}
+            if redis_url.startswith("rediss://"):
+                kwargs["ssl_cert_reqs"] = None
+            
+            self.redis_client = redis.from_url(redis_url, **kwargs)
             self.redis_client.ping()
             logger.info(f"Connected to Redis at {redis_url}")
         except Exception as e:
