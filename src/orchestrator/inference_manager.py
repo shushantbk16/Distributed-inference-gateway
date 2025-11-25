@@ -204,6 +204,12 @@ class InferenceManager:
             
         except Exception as e:
             latency = time.time() - start_time
+            
+            # Unwrap RetryError to get the underlying cause
+            from tenacity import RetryError
+            if isinstance(e, RetryError):
+                e = e.last_attempt.exception()
+            
             error_msg = f"Provider {provider_name} failed: {str(e)}"
             logger.error(error_msg)
             
