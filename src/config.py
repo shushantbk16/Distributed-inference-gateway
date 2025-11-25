@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     
     # LLM Provider Settings
     groq_model: str = "llama-3.3-70b-versatile"
-    gemini_model: str = "gemini-3-pro-preview"
+    gemini_model: str = "gemini-1.5-flash"
     
     # Cache Configuration
     redis_url: str = "redis://localhost:6379"

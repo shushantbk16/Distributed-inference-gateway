@@ -86,7 +86,11 @@ class GeminiProvider(BaseLLMProvider):
             
         except Exception as e:
             logger.error(f"Error in Gemini provider: {e}")
-            raise ProviderError("gemini", str(e), e)
+            # If it's a Google API error, try to extract more details
+            error_msg = str(e)
+            if hasattr(e, 'message'):
+                error_msg = e.message
+            raise ProviderError("gemini", error_msg, e)
     
     async def health_check(self) -> bool:
         """Check if Gemini API is accessible."""
