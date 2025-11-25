@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-2.5-flash"
     
     # Cache Configuration
-    redis_url: str = "redis://localhost:6379"
+    redis_url: str = "redis://gateway-cache:6379"
     cache_similarity_threshold: float = 0.95  # 95% similar = cache hit
     cache_ttl: int = 3600  # 1 hour
     
