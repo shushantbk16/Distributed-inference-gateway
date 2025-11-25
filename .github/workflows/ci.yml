@@ -36,7 +36,7 @@ jobs:
         
     - name: Run Unit Tests
       run: |
-        pytest tests/test_judge.py tests/test_code_extractor.py -v
+        python -m pytest tests/test_judge.py tests/test_code_extractor.py -v
       env:
         ENVIRONMENT: "test"
         PYTHONPATH: "."
@@ -48,4 +48,8 @@ jobs:
       run: |
         pip install flake8
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Verify Docker Build
+      run: |
+        docker build . -t inference-gateway:test
